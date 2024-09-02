@@ -45,14 +45,14 @@ func (s *Suspender) SuspendFromFile(ctx context.Context, sourceFile string) (err
 	buf := bytes.Buffer{}
 
 	// Count number of lines, validate UUID v4
-	line := 1
+	line := 0
 	for fileScanner.Scan() {
 		userID = fileScanner.Text()
-		fmt.Fprintln(&buf, userID)
+		line++
 		if _, err := uuid.Parse(userID); err != nil {
 			return fmt.Errorf(`"%s" on line %d is not a valid UUID v4`, userID, line)
 		}
-		line++
+		fmt.Fprintln(&buf, userID)
 	}
 
 	// Rescan
