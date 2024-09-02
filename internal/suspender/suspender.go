@@ -17,12 +17,15 @@ import (
 func (s *Suspender) BatchSuspend(ctx context.Context, buf bytes.Buffer, status BatchSuspensionStatus) BatchSuspensionStatus {
 	scanner := bufio.NewScanner(&buf)
 	suspensionStatuses := make(chan SuspensionStatus, status.NumRecords)
+
 	var wg sync.WaitGroup
 	var userID string
+	var err error
+
 	for scanner.Scan() {
 		wg.Add(1)
 		userID = scanner.Text()
-		if err := s.Suspend(ctx, userID); err != nil {
+		if err = s.Suspend(ctx, userID); err != nil {
 			suspensionStatuses <- SuspensionStatus{UserID: userID, Error: err}
 			wg.Done()
 			continue
@@ -36,7 +39,6 @@ func (s *Suspender) BatchSuspend(ctx context.Context, buf bytes.Buffer, status B
 		close(suspensionStatuses)
 	}()
 
-	var err error
 	for suspensionStatus := range suspensionStatuses {
 		if suspensionStatus.Error != nil {
 			status.NumFailed++
