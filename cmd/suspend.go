@@ -47,13 +47,13 @@ fraudster_suspender suspend --source-file=/Users/john/Downloads/fraudsters.txt`,
 		}
 
 		suspender := susp.NewSuspender(cognito)
-		buf, numRecords, err := suspender.CreateBufFromFile(ctx, sourceFile)
+		batchBuffer, err := suspender.CreateBufFromFile(ctx, sourceFile)
 		if err != nil {
 			log.Fatal(err.Error())
 		}
 
-		batchStatus := suspender.BatchSuspend(ctx, buf, susp.BatchSuspensionStatus{
-			NumRecords: numRecords,
+		batchStatus := suspender.BatchSuspend(ctx, batchBuffer.Buf, susp.BatchSuspensionStatus{
+			NumRecords: batchBuffer.NumRecords,
 		})
 
 		// Output failures if there's any

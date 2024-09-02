@@ -66,11 +66,11 @@ func (s *Suspender) Suspend(ctx context.Context, userID string) (err error) {
 	return nil
 }
 
-func (s *Suspender) CreateBufFromFile(ctx context.Context, sourceFile string) (buf bytes.Buffer, numRecords int, err error) {
+func (s *Suspender) CreateBufFromFile(ctx context.Context, sourceFile string) (batchBuffer BatchBuffer, err error) {
 	// Open the source file
 	file, err := os.Open(sourceFile)
 	if err != nil {
-		return buf, numRecords, err
+		return batchBuffer, err
 	}
 	defer file.Close()
 
@@ -86,15 +86,15 @@ func (s *Suspender) CreateBufFromFile(ctx context.Context, sourceFile string) (b
 		userID = scanner.Text()
 		line++
 		if _, err := uuid.Parse(userID); err != nil {
-			return buf, numRecords, fmt.Errorf(`"%s" on line %d is not a valid UUID v4`, userID, line)
+			return batchBuffer, fmt.Errorf(`"%s" on line %d is not a valid UUID v4`, userID, line)
 		}
-		numRecords++
+		batchBuffer.NumRecords++
 
 		// Collect user IDs
-		fmt.Fprintln(&buf, userID)
+		fmt.Fprintln(&batchBuffer.Buf, userID)
 	}
 
-	return buf, numRecords, nil
+	return batchBuffer, nil
 }
 
 func (s *Suspender) UpdateDatabase(userID string) error {
@@ -115,6 +115,11 @@ func NewSuspender(cognito *cognito.Cognito) *Suspender {
 const (
 	DoneMsg = "batch suspension done, # of records: %d, # of successful: %d, # of failed: %d\n"
 )
+
+type BatchBuffer struct {
+	Buf        bytes.Buffer
+	NumRecords int
+}
 
 type BatchSuspensionStatus struct {
 	NumRecords    int
