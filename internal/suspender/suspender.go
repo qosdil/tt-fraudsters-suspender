@@ -1,0 +1,122 @@
+package suspender
+
+import (
+	"bufio"
+	"bytes"
+	"context"
+	"fmt"
+	"log"
+	"main/internal/cognito"
+	"os"
+	"sync"
+	"time"
+
+	"github.com/google/uuid"
+)
+
+type Suspender struct {
+	Cognito *cognito.Cognito
+}
+
+type SuspensionStatus struct {
+	UserID string `json:"user_id"`
+	Error  error  `json:"error"`
+}
+
+func NewSuspender(cognito *cognito.Cognito) *Suspender {
+	s := new(Suspender)
+	s.Cognito = cognito
+	return s
+}
+
+func (s *Suspender) Suspend(ctx context.Context, userID string) (err error) {
+	if err := s.Cognito.DisableUser(ctx, userID); err != nil {
+		return err
+	}
+	if err := s.UpdateDatabase(userID); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *Suspender) UpdateDatabase(userID string) error {
+	log.Printf("[simulation] updating db row for user ID %s...\n", userID)
+	if userID == "83525ffb-15d5-4d04-a517-ce830b3f77a9" {
+		return fmt.Errorf("failed to connect to database")
+	}
+	time.Sleep(50 * time.Millisecond)
+	return nil
+}
+
+var numRecords, numSuccessful, numFailed int
+
+const (
+	doneMsg = "batch suspension done, # of records: %d, # of successful: %d, # of failed: %d\n"
+)
+
+func (s *Suspender) SuspendFromFile(ctx context.Context, sourceFile string) (err error) {
+	// Open the source file
+	readFile, err := os.Open(sourceFile)
+	if err != nil {
+		return err
+	}
+	defer readFile.Close()
+
+	// Scan the content
+	fileScanner := bufio.NewScanner(readFile)
+	fileScanner.Split(bufio.ScanLines)
+
+	var userID string
+
+	// For the rescan
+	buf := bytes.Buffer{}
+
+	// Count number of lines, validate UUID v4
+	line := 1
+	for fileScanner.Scan() {
+		userID = fileScanner.Text()
+		fmt.Fprintln(&buf, userID)
+		if _, err := uuid.Parse(userID); err != nil {
+			return fmt.Errorf(`"%s" on line %d is not a valid UUID v4`, userID, line)
+		}
+		line++
+	}
+
+	// Rescan
+	fileScanner = bufio.NewScanner(&buf)
+
+	numRecords = line
+	suspensionStatuses := make(chan SuspensionStatus, numRecords)
+	var wg sync.WaitGroup
+	for fileScanner.Scan() {
+		wg.Add(1)
+		userID = fileScanner.Text()
+		log.Printf("suspending user ID %s...\n", userID)
+		if err := s.Suspend(ctx, userID); err != nil {
+			suspensionStatuses <- SuspensionStatus{UserID: userID, Error: err}
+			wg.Done()
+			continue
+		}
+		suspensionStatuses <- SuspensionStatus{UserID: userID}
+		wg.Done()
+	}
+
+	go func() {
+		wg.Wait()
+		close(suspensionStatuses)
+	}()
+
+	for suspensionStatus := range suspensionStatuses {
+		if suspensionStatus.Error != nil {
+			numFailed++
+			log.Printf("failed suspending user ID %s: %s\n", suspensionStatus.UserID, suspensionStatus.Error.Error())
+			continue
+		}
+
+		numSuccessful++
+		log.Printf("successful suspending user ID %s\n", suspensionStatus.UserID)
+	}
+
+	log.Printf(doneMsg, numRecords, numSuccessful, numFailed)
+	return nil
+}
