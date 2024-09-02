@@ -36,10 +36,11 @@ fraudster_suspender suspend --source-file=/Users/john/Downloads/fraudsters.txt`,
 			Region: os.Getenv("AMAZON_COGNITO_CONFIG_REGION"),
 			PoolID: os.Getenv("AMAZON_COGNITO_USER_POOL_ID"),
 		})
+
 		var err error
+		ctx := context.Background()
 
 		// Get Cognito client
-		ctx := context.Background()
 		cognito.Client, err = cognito.GetClient(ctx)
 		if err != nil {
 			log.Fatalf("error on getting a Cognito client: %s", err.Error())
