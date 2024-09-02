@@ -19,6 +19,9 @@ func (s *Suspender) Suspend(ctx context.Context, userID string) (err error) {
 		return err
 	}
 	if err := s.UpdateDatabase(userID); err != nil {
+		// Re-enable user on Cognito
+		s.Cognito.EnableUser(ctx, userID)
+
 		return err
 	}
 	return nil
@@ -95,7 +98,7 @@ func (s *Suspender) SuspendFromFile(ctx context.Context, sourceFile string) (err
 
 func (s *Suspender) UpdateDatabase(userID string) error {
 	log.Printf("[simulation] updating db row for user ID %s...\n", userID)
-	if userID == "83525ffb-15d5-4d04-a517-ce830b3f77a9" {
+	if userID == "e9aa25ac-a061-70fa-0bd0-2ee61818a6b2" {
 		return fmt.Errorf("failed to connect to database")
 	}
 	time.Sleep(50 * time.Millisecond)

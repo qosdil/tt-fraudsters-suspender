@@ -42,3 +42,13 @@ func (c *Cognito) DisableUser(ctx context.Context, username string) (err error) 
 	}
 	return nil
 }
+
+func (c *Cognito) EnableUser(ctx context.Context, username string) (err error) {
+	if _, err = c.Client.AdminEnableUser(ctx, &IdentityProvider.AdminEnableUserInput{
+		UserPoolId: aws.String(c.Config.PoolID),
+		Username:   aws.String(username),
+	}); err != nil {
+		return err
+	}
+	return nil
+}
