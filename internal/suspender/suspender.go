@@ -29,15 +29,15 @@ func (s *Suspender) Suspend(ctx context.Context, userID string) (err error) {
 
 func (s *Suspender) SuspendFromFile(ctx context.Context, sourceFile string) (err error) {
 	// Open the source file
-	readFile, err := os.Open(sourceFile)
+	file, err := os.Open(sourceFile)
 	if err != nil {
 		return err
 	}
-	defer readFile.Close()
+	defer file.Close()
 
 	// Scan the content
-	fileScanner := bufio.NewScanner(readFile)
-	fileScanner.Split(bufio.ScanLines)
+	scanner := bufio.NewScanner(file)
+	scanner.Split(bufio.ScanLines)
 
 	var userID string
 
@@ -46,8 +46,8 @@ func (s *Suspender) SuspendFromFile(ctx context.Context, sourceFile string) (err
 
 	// Count number of lines, validate UUID v4
 	line := 0
-	for fileScanner.Scan() {
-		userID = fileScanner.Text()
+	for scanner.Scan() {
+		userID = scanner.Text()
 		line++
 		if _, err := uuid.Parse(userID); err != nil {
 			return fmt.Errorf(`"%s" on line %d is not a valid UUID v4`, userID, line)
