@@ -97,7 +97,7 @@ func (s *Suspender) SuspendFromFile(ctx context.Context, sourceFile string) (err
 }
 
 func (s *Suspender) UpdateDatabase(userID string) error {
-	log.Printf("[simulation] updating db row for user ID %s...\n", userID)
+	log.Printf("[simulation] updating db row for user %s...\n", userID)
 	if userID == "e9aa25ac-a061-70fa-0bd0-2ee61818a6b2" {
 		return fmt.Errorf("failed to connect to database")
 	}
