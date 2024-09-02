@@ -40,13 +40,14 @@ func (s *Suspender) BatchSuspend(ctx context.Context, buf bytes.Buffer, status B
 	}()
 
 	for suspensionStatus := range suspensionStatuses {
-		if suspensionStatus.Error != nil {
-			status.NumFailed++
-			err = fmt.Errorf("failed suspending user %s: %s", suspensionStatus.UserID, suspensionStatus.Error.Error())
-			status.Failures = append(status.Failures, err)
+		if suspensionStatus.Error == nil {
+			status.NumSuccessful++
 			continue
 		}
-		status.NumSuccessful++
+
+		status.NumFailed++
+		err = fmt.Errorf("failed suspending user %s: %s", suspensionStatus.UserID, suspensionStatus.Error.Error())
+		status.Failures = append(status.Failures, err)
 	}
 
 	return status
