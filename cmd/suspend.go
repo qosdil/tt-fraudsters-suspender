@@ -42,8 +42,7 @@ fraudster_suspender suspend --source-file=/Users/john/Downloads/fraudsters.txt`,
 		ctx := context.Background()
 
 		// Get Cognito client
-		cognito.Client, err = cognito.GetClient(ctx)
-		if err != nil {
+		if cognito.Client, err = cognito.GetClient(ctx); err != nil {
 			log.Fatalf("error on getting a Cognito client: %s", err.Error())
 		}
 
