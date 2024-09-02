@@ -14,6 +14,42 @@ import (
 	"github.com/google/uuid"
 )
 
+func (s *Suspender) BatchSuspend(ctx context.Context, buf bytes.Buffer, status BatchSuspensionStatus) BatchSuspensionStatus {
+	scanner := bufio.NewScanner(&buf)
+	suspensionStatuses := make(chan SuspensionStatus, status.NumRecords)
+	var wg sync.WaitGroup
+	var userID string
+	for scanner.Scan() {
+		wg.Add(1)
+		userID = scanner.Text()
+		if err := s.Suspend(ctx, userID); err != nil {
+			suspensionStatuses <- SuspensionStatus{UserID: userID, Error: err}
+			wg.Done()
+			continue
+		}
+		suspensionStatuses <- SuspensionStatus{UserID: userID}
+		wg.Done()
+	}
+
+	go func() {
+		wg.Wait()
+		close(suspensionStatuses)
+	}()
+
+	var err error
+	for suspensionStatus := range suspensionStatuses {
+		if suspensionStatus.Error != nil {
+			status.NumFailed++
+			err = fmt.Errorf("failed suspending user %s: %s", suspensionStatus.UserID, suspensionStatus.Error.Error())
+			status.Failures = append(status.Failures, err)
+			continue
+		}
+		status.NumSuccessful++
+	}
+
+	return status
+}
+
 func (s *Suspender) Suspend(ctx context.Context, userID string) (err error) {
 	if err := s.Cognito.DisableUser(ctx, userID); err != nil {
 		return err
@@ -54,45 +90,13 @@ func (s *Suspender) SuspendFromFile(ctx context.Context, sourceFile string) (err
 		}
 		fmt.Fprintln(&buf, userID)
 	}
-	batchStatus := BatchSuspensionStatus{
+	batchStatus := s.BatchSuspend(ctx, buf, BatchSuspensionStatus{
 		NumRecords: line,
-	}
-
-	// Rescan
-	fileScanner = bufio.NewScanner(&buf)
-
-	suspensionStatuses := make(chan SuspensionStatus, batchStatus.NumRecords)
-	var wg sync.WaitGroup
-	for fileScanner.Scan() {
-		wg.Add(1)
-		userID = fileScanner.Text()
-		log.Printf("suspending user ID %s...\n", userID)
-		if err := s.Suspend(ctx, userID); err != nil {
-			suspensionStatuses <- SuspensionStatus{UserID: userID, Error: err}
-			wg.Done()
-			continue
-		}
-		suspensionStatuses <- SuspensionStatus{UserID: userID}
-		wg.Done()
-	}
-
-	go func() {
-		wg.Wait()
-		close(suspensionStatuses)
-	}()
-
-	for suspensionStatus := range suspensionStatuses {
-		if suspensionStatus.Error != nil {
-			batchStatus.NumFailed++
-			log.Printf("failed suspending user ID %s: %s\n", suspensionStatus.UserID, suspensionStatus.Error.Error())
-			continue
-		}
-
-		batchStatus.NumSuccessful++
-		log.Printf("successful suspending user ID %s\n", suspensionStatus.UserID)
-	}
-
+	})
 	log.Printf(doneMsg, batchStatus.NumRecords, batchStatus.NumSuccessful, batchStatus.NumFailed)
+	for _, failure := range batchStatus.Failures {
+		log.Println(failure.Error())
+	}
 	return nil
 }
 
@@ -119,6 +123,7 @@ type BatchSuspensionStatus struct {
 	NumRecords    int
 	NumSuccessful int
 	NumFailed     int
+	Failures      []error
 }
 
 type Suspender struct {
