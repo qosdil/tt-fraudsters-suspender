@@ -5,11 +5,10 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"log"
 	"main/internal/cognito"
+	"main/internal/database"
 	"os"
 	"sync"
-	"time"
 
 	"github.com/google/uuid"
 )
@@ -57,7 +56,7 @@ func (s *Suspender) Suspend(ctx context.Context, userID string) (err error) {
 	if err := s.Cognito.DisableUser(ctx, userID); err != nil {
 		return err
 	}
-	if err := s.UpdateDatabase(userID); err != nil {
+	if err := s.Database.DisableUser(userID); err != nil {
 		// Re-enable user on Cognito
 		s.Cognito.EnableUser(ctx, userID)
 
@@ -97,18 +96,10 @@ func (s *Suspender) CreateBufFromFile(ctx context.Context, sourceFile string) (b
 	return batchBuffer, nil
 }
 
-func (s *Suspender) UpdateDatabase(userID string) error {
-	log.Printf("[simulation] updating db row for user %s...\n", userID)
-	if userID == "e9aa25ac-a061-70fa-0bd0-2ee61818a6b2" {
-		return fmt.Errorf("failed to connect to database")
-	}
-	time.Sleep(50 * time.Millisecond)
-	return nil
-}
-
-func NewSuspender(cognito *cognito.Cognito) *Suspender {
+func NewSuspender(cognito *cognito.Cognito, sqlDB *database.Database) *Suspender {
 	s := new(Suspender)
 	s.Cognito = cognito
+	s.Database = sqlDB
 	return s
 }
 
@@ -129,7 +120,8 @@ type BatchSuspensionStatus struct {
 }
 
 type Suspender struct {
-	Cognito *cognito.Cognito
+	Cognito  *cognito.Cognito
+	Database *database.Database
 }
 
 type SuspensionStatus struct {

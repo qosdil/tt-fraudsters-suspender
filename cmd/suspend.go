@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"main/internal/cognito"
+	"main/internal/database"
 	susp "main/internal/suspender"
 	"os"
 
@@ -46,7 +47,21 @@ fraudster_suspender suspend --source-file=/Users/john/Downloads/fraudsters.txt`,
 			log.Fatalf("error on getting a Cognito client: %s", err.Error())
 		}
 
-		suspender := susp.NewSuspender(cognito)
+		// Create a database connection
+		db := database.NewDatabase(database.Config{
+			Host:     os.Getenv("DB_HOST"),
+			Port:     os.Getenv("DB_PORT"),
+			User:     os.Getenv("DB_USER"),
+			Password: os.Getenv("DB_PASSWORD"),
+			Name:     os.Getenv("DB_NAME"),
+			SSLMode:  os.Getenv("DB_SSL_MODE"),
+		})
+		if db.SqlDB, err = db.Open(); err != nil {
+			log.Fatalf("error on opening a connection to database: %s", err.Error())
+		}
+		defer db.SqlDB.Close()
+
+		suspender := susp.NewSuspender(cognito, db)
 		batchBuffer, err := suspender.CreateBufFromFile(ctx, sourceFile)
 		if err != nil {
 			log.Fatal(err.Error())
