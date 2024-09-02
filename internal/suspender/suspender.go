@@ -65,11 +65,11 @@ func (s *Suspender) Suspend(ctx context.Context, userID string) (err error) {
 	return nil
 }
 
-func (s *Suspender) SuspendFromFile(ctx context.Context, sourceFile string) (err error) {
+func (s *Suspender) CreateBufFromFile(ctx context.Context, sourceFile string) (buf bytes.Buffer, numRecords int, err error) {
 	// Open the source file
 	file, err := os.Open(sourceFile)
 	if err != nil {
-		return err
+		return buf, numRecords, err
 	}
 	defer file.Close()
 
@@ -79,27 +79,21 @@ func (s *Suspender) SuspendFromFile(ctx context.Context, sourceFile string) (err
 
 	var userID string
 
-	// For the rescan
-	buf := bytes.Buffer{}
-
 	// Count number of lines, validate UUID v4
 	line := 0
 	for scanner.Scan() {
 		userID = scanner.Text()
 		line++
 		if _, err := uuid.Parse(userID); err != nil {
-			return fmt.Errorf(`"%s" on line %d is not a valid UUID v4`, userID, line)
+			return buf, numRecords, fmt.Errorf(`"%s" on line %d is not a valid UUID v4`, userID, line)
 		}
+		numRecords++
+
+		// Collect user IDs
 		fmt.Fprintln(&buf, userID)
 	}
-	batchStatus := s.BatchSuspend(ctx, buf, BatchSuspensionStatus{
-		NumRecords: line,
-	})
-	log.Printf(doneMsg, batchStatus.NumRecords, batchStatus.NumSuccessful, batchStatus.NumFailed)
-	for _, failure := range batchStatus.Failures {
-		log.Println(failure.Error())
-	}
-	return nil
+
+	return buf, numRecords, nil
 }
 
 func (s *Suspender) UpdateDatabase(userID string) error {
@@ -118,7 +112,7 @@ func NewSuspender(cognito *cognito.Cognito) *Suspender {
 }
 
 const (
-	doneMsg = "batch suspension done, # of records: %d, # of successful: %d, # of failed: %d\n"
+	DoneMsg = "batch suspension done, # of records: %d, # of successful: %d, # of failed: %d\n"
 )
 
 type BatchSuspensionStatus struct {

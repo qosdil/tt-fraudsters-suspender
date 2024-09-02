@@ -37,14 +37,29 @@ fraudster_suspender suspend --source-file=/Users/john/Downloads/fraudsters.txt`,
 			PoolID: os.Getenv("AMAZON_COGNITO_USER_POOL_ID"),
 		})
 		var err error
+
+		// Get Cognito client
 		ctx := context.Background()
 		cognito.Client, err = cognito.GetClient(ctx)
 		if err != nil {
 			log.Fatalf("error on getting a Cognito client: %s", err.Error())
 		}
+
 		suspender := susp.NewSuspender(cognito)
-		if err = suspender.SuspendFromFile(ctx, sourceFile); err != nil {
+		buf, numRecords, err := suspender.CreateBufFromFile(ctx, sourceFile)
+		if err != nil {
 			log.Fatal(err.Error())
 		}
+
+		batchStatus := suspender.BatchSuspend(ctx, buf, susp.BatchSuspensionStatus{
+			NumRecords: numRecords,
+		})
+
+		// Output failures if there's any
+		for _, failure := range batchStatus.Failures {
+			log.Println(failure.Error())
+		}
+
+		log.Printf(susp.DoneMsg, batchStatus.NumRecords, batchStatus.NumSuccessful, batchStatus.NumFailed)
 	},
 }
