@@ -54,13 +54,13 @@ func (s *Suspender) SuspendFromFile(ctx context.Context, sourceFile string) (err
 		}
 		fmt.Fprintln(&buf, userID)
 	}
+	batchStatus := BatchSuspensionStatus{
+		NumRecords: line,
+	}
 
 	// Rescan
 	fileScanner = bufio.NewScanner(&buf)
 
-	batchStatus := BatchSuspensionStatus{
-		NumRecords: line,
-	}
 	suspensionStatuses := make(chan SuspensionStatus, batchStatus.NumRecords)
 	var wg sync.WaitGroup
 	for fileScanner.Scan() {
