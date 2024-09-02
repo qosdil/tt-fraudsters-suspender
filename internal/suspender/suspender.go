@@ -14,21 +14,6 @@ import (
 	"github.com/google/uuid"
 )
 
-type Suspender struct {
-	Cognito *cognito.Cognito
-}
-
-type SuspensionStatus struct {
-	UserID string `json:"user_id"`
-	Error  error  `json:"error"`
-}
-
-func NewSuspender(cognito *cognito.Cognito) *Suspender {
-	s := new(Suspender)
-	s.Cognito = cognito
-	return s
-}
-
 func (s *Suspender) Suspend(ctx context.Context, userID string) (err error) {
 	if err := s.Cognito.DisableUser(ctx, userID); err != nil {
 		return err
@@ -38,21 +23,6 @@ func (s *Suspender) Suspend(ctx context.Context, userID string) (err error) {
 	}
 	return nil
 }
-
-func (s *Suspender) UpdateDatabase(userID string) error {
-	log.Printf("[simulation] updating db row for user ID %s...\n", userID)
-	if userID == "83525ffb-15d5-4d04-a517-ce830b3f77a9" {
-		return fmt.Errorf("failed to connect to database")
-	}
-	time.Sleep(50 * time.Millisecond)
-	return nil
-}
-
-var numRecords, numSuccessful, numFailed int
-
-const (
-	doneMsg = "batch suspension done, # of records: %d, # of successful: %d, # of failed: %d\n"
-)
 
 func (s *Suspender) SuspendFromFile(ctx context.Context, sourceFile string) (err error) {
 	// Open the source file
@@ -85,8 +55,10 @@ func (s *Suspender) SuspendFromFile(ctx context.Context, sourceFile string) (err
 	// Rescan
 	fileScanner = bufio.NewScanner(&buf)
 
-	numRecords = line
-	suspensionStatuses := make(chan SuspensionStatus, numRecords)
+	batchStatus := BatchSuspensionStatus{
+		NumRecords: line,
+	}
+	suspensionStatuses := make(chan SuspensionStatus, batchStatus.NumRecords)
 	var wg sync.WaitGroup
 	for fileScanner.Scan() {
 		wg.Add(1)
@@ -108,15 +80,49 @@ func (s *Suspender) SuspendFromFile(ctx context.Context, sourceFile string) (err
 
 	for suspensionStatus := range suspensionStatuses {
 		if suspensionStatus.Error != nil {
-			numFailed++
+			batchStatus.NumFailed++
 			log.Printf("failed suspending user ID %s: %s\n", suspensionStatus.UserID, suspensionStatus.Error.Error())
 			continue
 		}
 
-		numSuccessful++
+		batchStatus.NumSuccessful++
 		log.Printf("successful suspending user ID %s\n", suspensionStatus.UserID)
 	}
 
-	log.Printf(doneMsg, numRecords, numSuccessful, numFailed)
+	log.Printf(doneMsg, batchStatus.NumRecords, batchStatus.NumSuccessful, batchStatus.NumFailed)
 	return nil
+}
+
+func (s *Suspender) UpdateDatabase(userID string) error {
+	log.Printf("[simulation] updating db row for user ID %s...\n", userID)
+	if userID == "83525ffb-15d5-4d04-a517-ce830b3f77a9" {
+		return fmt.Errorf("failed to connect to database")
+	}
+	time.Sleep(50 * time.Millisecond)
+	return nil
+}
+
+func NewSuspender(cognito *cognito.Cognito) *Suspender {
+	s := new(Suspender)
+	s.Cognito = cognito
+	return s
+}
+
+const (
+	doneMsg = "batch suspension done, # of records: %d, # of successful: %d, # of failed: %d\n"
+)
+
+type BatchSuspensionStatus struct {
+	NumRecords    int
+	NumSuccessful int
+	NumFailed     int
+}
+
+type Suspender struct {
+	Cognito *cognito.Cognito
+}
+
+type SuspensionStatus struct {
+	UserID string `json:"user_id"`
+	Error  error  `json:"error"`
 }
