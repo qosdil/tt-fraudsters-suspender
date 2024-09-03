@@ -5,8 +5,9 @@ import (
 	"log"
 	"main/internal/cognito"
 	"main/internal/database"
-	gen "main/internal/fake_users_generator"
+	generator "main/internal/fake_users_generator"
 	"os"
+	"time"
 
 	"github.com/spf13/cobra"
 )
@@ -28,6 +29,7 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		start := time.Now()
 		cognito := cognito.NewCognito(cognito.Config{
 			Region: os.Getenv("AMAZON_COGNITO_CONFIG_REGION"),
 			PoolID: os.Getenv("AMAZON_COGNITO_USER_POOL_ID"),
@@ -56,7 +58,7 @@ to quickly create a Cobra application.`,
 		defer db.SqlDB.Close()
 
 		log.Printf("start generating %d fake users...", numUsers)
-		gen := gen.NewFakeUsersGenerator(cognito, db)
+		gen := generator.NewFakeUsersGenerator(cognito, db)
 		batchText, err := gen.Generate(ctx, numUsers)
 		if err != nil {
 			log.Fatalf("error on generating fake users: %s", err.Error())
@@ -67,8 +69,10 @@ to quickly create a Cobra application.`,
 		if err != nil {
 			log.Fatal(err.Error())
 		}
+		elapsed := time.Since(start)
 
 		log.Printf("successfully generated %d fake users to Cognito, database and batch text file", numUsers)
+		log.Printf("done in %s\n", elapsed)
 	},
 }
 
