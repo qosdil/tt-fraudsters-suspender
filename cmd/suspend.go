@@ -67,6 +67,7 @@ fraudster_suspender suspend --source-file=/Users/john/Downloads/fraudsters.txt`,
 			log.Fatal(err.Error())
 		}
 
+		log.Printf("start suspending %d users...", batchBuffer.NumRecords)
 		start := time.Now()
 		batchStatus, err := suspender.BatchSuspend(ctx, batchBuffer.Buf, susp.BatchSuspensionStatus{
 			NumRecords: batchBuffer.NumRecords,
