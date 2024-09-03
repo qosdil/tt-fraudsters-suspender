@@ -5,7 +5,6 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"main/internal/cognito"
 	"os"
@@ -46,7 +45,7 @@ to quickly create a Cobra application.`,
 		if numAffected > 0 {
 			log.Printf("successfully deleted %d Cognito user(s)\n", numAffected)
 		} else {
-			fmt.Println("user pool is empty")
+			log.Println("user pool is empty")
 		}
 	},
 }
