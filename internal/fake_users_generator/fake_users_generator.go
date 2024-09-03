@@ -9,18 +9,6 @@ import (
 	"github.com/brianvoe/gofakeit/v7"
 )
 
-type FakeUsersGenerator struct {
-	Cognito  *cognito.Cognito
-	Database *database.Database
-}
-
-func NewFakeUsersGenerator(cognito *cognito.Cognito, sqlDB *database.Database) *FakeUsersGenerator {
-	s := new(FakeUsersGenerator)
-	s.Cognito = cognito
-	s.Database = sqlDB
-	return s
-}
-
 func (gen *FakeUsersGenerator) CreateUser(ctx context.Context, email string) (id string, err error) {
 	id, err = gen.Cognito.CreateUser(ctx, email)
 	if err != nil {
@@ -37,10 +25,10 @@ func (gen *FakeUsersGenerator) CreateUser(ctx context.Context, email string) (id
 	return id, nil
 }
 
-func (fug *FakeUsersGenerator) Generate(ctx context.Context, numUsers int) (batchText string, err error) {
+func (gen *FakeUsersGenerator) Generate(ctx context.Context, numUsers int) (batchText string, err error) {
 	var id string
 	for i := 1; i <= numUsers; i++ {
-		id, err = fug.CreateUser(ctx, gofakeit.Email())
+		id, err = gen.CreateUser(ctx, gofakeit.Email())
 		if err != nil {
 			return batchText, err
 		}
@@ -51,4 +39,16 @@ func (fug *FakeUsersGenerator) Generate(ctx context.Context, numUsers int) (batc
 	batchText = batchText[:len(batchText)-1]
 
 	return batchText, nil
+}
+
+func NewFakeUsersGenerator(cognito *cognito.Cognito, sqlDB *database.Database) *FakeUsersGenerator {
+	s := new(FakeUsersGenerator)
+	s.Cognito = cognito
+	s.Database = sqlDB
+	return s
+}
+
+type FakeUsersGenerator struct {
+	Cognito  *cognito.Cognito
+	Database *database.Database
 }
