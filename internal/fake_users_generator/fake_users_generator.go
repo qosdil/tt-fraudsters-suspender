@@ -16,7 +16,7 @@ func (gen *FakeUsersGenerator) CreateUser(ctx context.Context, email string) (id
 	}
 	if err = gen.Database.CreateUser(id, email); err != nil {
 		// Delete user from Cognito
-		if duErr := gen.Cognito.DeleteUser(ctx, id); err != nil {
+		if duErr := gen.Cognito.DeleteUser(ctx, id); duErr != nil {
 			return id, fmt.Errorf("failed to revert user creation on Cognito: %s", duErr.Error())
 		}
 
