@@ -39,7 +39,7 @@ func (s *Suspender) BatchSuspend(ctx context.Context, buf bytes.Buffer, status B
 		}
 
 		numChunkRows++
-		go s.ConSuspend(ctx, userID, suspensionStatuses, &wg)
+		go s.ChanSuspend(ctx, userID, suspensionStatuses, &wg)
 	}
 
 	go func() {
@@ -61,8 +61,8 @@ func (s *Suspender) BatchSuspend(ctx context.Context, buf bytes.Buffer, status B
 	return status, nil
 }
 
-// ConSuspend suspends user data with concurrency
-func (s *Suspender) ConSuspend(ctx context.Context, userID string, suspensionStatus chan SuspensionStatus, wg *sync.WaitGroup) (err error) {
+// ChanSuspend suspends with channel
+func (s *Suspender) ChanSuspend(ctx context.Context, userID string, suspensionStatus chan SuspensionStatus, wg *sync.WaitGroup) (err error) {
 	defer wg.Done()
 	if err = s.Suspend(ctx, userID); err != nil {
 		suspensionStatus <- SuspensionStatus{UserID: userID, Error: err}
