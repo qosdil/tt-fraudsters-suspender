@@ -2,13 +2,12 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"main/internal/cognito"
 	"main/internal/database"
+	gen "main/internal/fake_users_generator"
 	"os"
 
-	"github.com/brianvoe/gofakeit/v7"
 	"github.com/spf13/cobra"
 )
 
@@ -42,8 +41,6 @@ to quickly create a Cobra application.`,
 			log.Fatalf("error on getting a Cognito client: %s", err.Error())
 		}
 
-		var id, email, fileContent string
-
 		// Create a database connection
 		db := database.NewDatabase(database.Config{
 			Host:     os.Getenv("DB_HOST"),
@@ -58,29 +55,20 @@ to quickly create a Cobra application.`,
 		}
 		defer db.SqlDB.Close()
 
-		for i := 1; i <= numUsers; i++ {
-			email = gofakeit.Email()
-
-			if id, err = cognito.CreateUser(ctx, email); err != nil {
-				log.Fatalf("error on creating a Cognito user: %s", err.Error())
-			}
-
-			if err = db.CreateUser(id, email); err != nil {
-				log.Fatalf("error on creating a database user: %s", err.Error())
-			}
-
-			fileContent += id + "\n"
-			fmt.Printf("%d: %s %s\n", i, id, email)
+		log.Printf("start generating %d fake users...", numUsers)
+		gen := gen.NewFakeUsersGenerator(cognito, db)
+		batchText, err := gen.Generate(ctx, numUsers)
+		if err != nil {
+			log.Fatalf("error on generating fake users: %s", err.Error())
 		}
 
-		// Remove "\n" in last line
-		fileContent = fileContent[:len(fileContent)-1]
-
-		data := []byte(fileContent)
+		data := []byte(batchText)
 		err = os.WriteFile(destFile, data, 0644)
 		if err != nil {
 			log.Fatal(err.Error())
 		}
+
+		log.Printf("successfully generating %d fake users to Cognito, database and batch text file", numUsers)
 	},
 }
 
