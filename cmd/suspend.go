@@ -7,6 +7,7 @@ import (
 	"main/internal/database"
 	susp "main/internal/suspender"
 	"os"
+	"time"
 
 	"github.com/spf13/cobra"
 )
@@ -66,12 +67,14 @@ fraudster_suspender suspend --source-file=/Users/john/Downloads/fraudsters.txt`,
 			log.Fatal(err.Error())
 		}
 
+		start := time.Now()
 		batchStatus, err := suspender.BatchSuspend(ctx, batchBuffer.Buf, susp.BatchSuspensionStatus{
 			NumRecords: batchBuffer.NumRecords,
 		})
 		if err != nil {
 			log.Fatalf("failed to suspend in batch: %s", err.Error())
 		}
+		elapsed := time.Since(start)
 
 		// Output failures if there's any
 		for _, failure := range batchStatus.Failures {
@@ -79,5 +82,6 @@ fraudster_suspender suspend --source-file=/Users/john/Downloads/fraudsters.txt`,
 		}
 
 		log.Printf(susp.DoneMsg, batchStatus.NumRecords, batchStatus.NumSuccessful, batchStatus.NumFailed)
+		log.Printf("done in %s\n", elapsed)
 	},
 }
