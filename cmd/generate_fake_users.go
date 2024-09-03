@@ -68,7 +68,7 @@ to quickly create a Cobra application.`,
 			log.Fatal(err.Error())
 		}
 
-		log.Printf("successfully generating %d fake users to Cognito, database and batch text file", numUsers)
+		log.Printf("successfully generated %d fake users to Cognito, database and batch text file", numUsers)
 	},
 }
 
