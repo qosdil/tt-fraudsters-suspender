@@ -21,6 +21,17 @@ func (c *Cognito) CreateUser(ctx context.Context, email string) (id string, err 
 	return *user.User.Username, nil
 }
 
+func (c *Cognito) DeleteUser(ctx context.Context, id string) (err error) {
+	_, err = c.Client.AdminDeleteUser(ctx, &IdentityProvider.AdminDeleteUserInput{
+		UserPoolId: aws.String(c.Config.PoolID),
+		Username:   aws.String(id),
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (c *Cognito) DisableUser(ctx context.Context, username string) (err error) {
 	if _, err = c.Client.AdminDisableUser(ctx, &IdentityProvider.AdminDisableUserInput{
 		UserPoolId: aws.String(c.Config.PoolID),
