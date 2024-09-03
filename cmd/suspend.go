@@ -66,9 +66,12 @@ fraudster_suspender suspend --source-file=/Users/john/Downloads/fraudsters.txt`,
 			log.Fatal(err.Error())
 		}
 
-		batchStatus := suspender.BatchSuspend(ctx, batchBuffer.Buf, susp.BatchSuspensionStatus{
+		batchStatus, err := suspender.BatchSuspend(ctx, batchBuffer.Buf, susp.BatchSuspensionStatus{
 			NumRecords: batchBuffer.NumRecords,
 		})
+		if err != nil {
+			log.Fatalf("failed to suspend in batch: %s", err.Error())
+		}
 
 		// Output failures if there's any
 		for _, failure := range batchStatus.Failures {
