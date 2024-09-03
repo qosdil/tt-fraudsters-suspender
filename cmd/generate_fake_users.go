@@ -70,7 +70,7 @@ to quickly create a Cobra application.`,
 			}
 
 			fileContent += id + "\n"
-			fmt.Printf("#%d: %s %s\n", i, id, email)
+			fmt.Printf("%d: %s %s\n", i, id, email)
 		}
 
 		// Remove "\n" in last line
