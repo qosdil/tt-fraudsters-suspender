@@ -34,6 +34,7 @@ Command example:
 
 fraudster_suspender suspend --source-file=/Users/john/Downloads/fraudsters.txt`,
 	Run: func(cmd *cobra.Command, args []string) {
+		start := time.Now()
 		cognito := cognito.NewCognito(cognito.Config{
 			Region: os.Getenv("AMAZON_COGNITO_CONFIG_REGION"),
 			PoolID: os.Getenv("AMAZON_COGNITO_USER_POOL_ID"),
@@ -68,7 +69,6 @@ fraudster_suspender suspend --source-file=/Users/john/Downloads/fraudsters.txt`,
 		}
 
 		log.Printf("start suspending %d users...", batchBuffer.NumRecords)
-		start := time.Now()
 		batchStatus, err := suspender.BatchSuspend(ctx, batchBuffer.Buf, susp.BatchSuspensionStatus{
 			NumRecords: batchBuffer.NumRecords,
 		})
