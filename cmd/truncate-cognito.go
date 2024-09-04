@@ -7,7 +7,7 @@ import (
 	"context"
 	"log"
 	"os"
-	"tt_fraudsters_suspender/internal/datastores/cognito"
+	"tt-fraudsters-suspender/internal/datastores/cognito"
 
 	"github.com/spf13/cobra"
 )

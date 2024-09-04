@@ -5,9 +5,9 @@ import (
 	"log"
 	"os"
 	"time"
-	"tt_fraudsters_suspender/internal/datastores/cognito"
-	database "tt_fraudsters_suspender/internal/datastores/postgres"
-	susp "tt_fraudsters_suspender/internal/pkg/suspender"
+	"tt-fraudsters-suspender/internal/datastores/cognito"
+	database "tt-fraudsters-suspender/internal/datastores/postgres"
+	susp "tt-fraudsters-suspender/internal/pkg/suspender"
 
 	"github.com/spf13/cobra"
 )

@@ -8,8 +8,8 @@ import (
 	"os"
 	"sync"
 	"time"
-	"tt_fraudsters_suspender/internal/datastores/cognito"
-	database "tt_fraudsters_suspender/internal/datastores/postgres"
+	"tt-fraudsters-suspender/internal/datastores/cognito"
+	database "tt-fraudsters-suspender/internal/datastores/postgres"
 
 	"github.com/google/uuid"
 )
