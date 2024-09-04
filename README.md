@@ -8,7 +8,7 @@
 
 Please learn the Commands section below for the explanations of each command.
 
-The `suspend` command demonstrates the fast batch update process to Amazon Cognito and PostgreSQL database simultaneously by leveraging Go's concurrency.
+The main purpose of this app is to demonstrate the fast batch update process to Amazon Cognito and PostgreSQL database simultaneously by leveraging Go's concurrency.
 
 This repo is the rewrite of the original version in which the code was part of the whole User service repository and it is not open source.
 
