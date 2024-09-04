@@ -58,7 +58,7 @@ Please continue with next section for more details on how to work with app.
 
 ### Generate Fake Users
 
-This command generate N numbers of fake users and will write to Cognito, PostgreSQL database and a text file.
+This command generates N numbers of fake users (assume they all are fraudsters of the system) and will write to Cognito, PostgreSQL database and a text file.
 
 The following example will generate 1000 fake users:
 ```
