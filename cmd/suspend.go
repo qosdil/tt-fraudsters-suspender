@@ -35,12 +35,15 @@ Command example:
 fraudster_suspender suspend --source-file=/Users/john/Downloads/fraudsters.txt`,
 	Run: func(cmd *cobra.Command, args []string) {
 		start := time.Now()
-		cognito := cognito.NewCognito(cognito.Config{
+		var err error
+		cognito, err := cognito.NewCognito(cognito.Config{
 			Region: os.Getenv("AMAZON_COGNITO_CONFIG_REGION"),
 			PoolID: os.Getenv("AMAZON_COGNITO_USER_POOL_ID"),
 		})
+		if err != nil {
+			log.Fatalf("error on instantiating Cognito: %s", err.Error())
+		}
 
-		var err error
 		ctx := context.Background()
 
 		// Get Cognito client

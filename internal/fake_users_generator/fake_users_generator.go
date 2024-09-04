@@ -3,7 +3,6 @@ package fake_user_generator
 import (
 	"context"
 	"fmt"
-	cognitoCfg "main/configs/cognito"
 	"main/internal/cognito"
 	"main/internal/database"
 	"sync"
@@ -47,17 +46,12 @@ func (gen *FakeUsersGenerator) Generate(ctx context.Context, numUsers int) (batc
 	creationStatuses := make(chan CreationStatus, numUsers)
 	var wg sync.WaitGroup
 
-	rowsPerChunk, err := cognitoCfg.GetRowsPerChunk()
-	if err != nil {
-		return batchText, err
-	}
-
 	for i := 1; i <= numUsers; i++ {
 		wg.Add(1)
 
 		// Wait for a second if number of chunked rows exceeds rowsPerChunk
 		// This is to overcome RPS limitation on Cognito
-		if numChunkRows >= rowsPerChunk {
+		if numChunkRows >= gen.Cognito.GetRowsPerChunk() {
 			time.Sleep(time.Second)
 		}
 

@@ -2,6 +2,10 @@ package cognito
 
 import (
 	"context"
+	"fmt"
+	cfg "main/configs/cognito"
+	"os"
+	"strconv"
 
 	AWSSDKConfig "github.com/aws/aws-sdk-go-v2/config"
 	IdentityProvider "github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider"
@@ -61,6 +65,10 @@ func (c *Cognito) GetClient(ctx context.Context) (*IdentityProvider.Client, erro
 	return IdentityProvider.NewFromConfig(cfg), nil
 }
 
+func (c *Cognito) GetRowsPerChunk() float32 {
+	return *rowsPerChunk
+}
+
 func (c *Cognito) Truncate(ctx context.Context) (int, error) {
 	lastTruncateNumAffected = 0
 
@@ -92,11 +100,40 @@ func (c *Cognito) Truncate(ctx context.Context) (int, error) {
 	return truncateNumAffected, nil
 }
 
-func NewCognito(config Config) *Cognito {
+func NewCognito(config Config) (*Cognito, error) {
 	c := new(Cognito)
 	c.Config = config
-	return c
+	if err := setRowsPerChunk(); err != nil {
+		return c, err
+	}
+
+	return c, nil
 }
+
+func setRowsPerChunk() (err error) {
+	maxRPS64, err := strconv.ParseFloat(os.Getenv(cfg.KeyMaxRPS), 32)
+	if err != nil {
+		return fmt.Errorf("failed to parse env var of %s: %s", cfg.KeyMaxRPS, err.Error())
+	}
+
+	maxRPSChunkRatio64, err := strconv.ParseFloat(os.Getenv(cfg.KeyMaxRPSChunkRatio), 32)
+	if err != nil {
+		return fmt.Errorf("failed to parse env var of %s: %s", cfg.KeyMaxRPSChunkRatio, err.Error())
+	}
+
+	result := float32(maxRPS64) * float32(maxRPSChunkRatio64)
+	rowsPerChunk = &result
+	return nil
+}
+
+var (
+	lastTruncateNumAffected int
+
+	// TODO convert to *int
+	rowsPerChunk *float32
+
+	truncateNumAffected int
+)
 
 type Cognito struct {
 	Config Config
@@ -107,5 +144,3 @@ type Config struct {
 	Region string
 	PoolID string
 }
-
-var lastTruncateNumAffected, truncateNumAffected int

@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	cognitoCfg "main/configs/cognito"
 	"main/internal/cognito"
 	"main/internal/database"
 	"os"
@@ -23,10 +22,6 @@ func (s *Suspender) BatchSuspend(ctx context.Context, buf bytes.Buffer, status B
 	var userID string
 	var err error
 
-	rowsPerChunk, err := cognitoCfg.GetRowsPerChunk()
-	if err != nil {
-		return status, err
-	}
 
 	for scanner.Scan() {
 		wg.Add(1)
@@ -34,7 +29,7 @@ func (s *Suspender) BatchSuspend(ctx context.Context, buf bytes.Buffer, status B
 
 		// Wait for a second if number of chunked rows exceeds rowsPerChunk
 		// This is to overcome RPS limitation on Cognito
-		if numChunkRows >= rowsPerChunk {
+		if numChunkRows >= s.Cognito.GetRowsPerChunk() {
 			time.Sleep(time.Second)
 		}
 
