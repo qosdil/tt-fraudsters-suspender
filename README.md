@@ -87,7 +87,7 @@ tt-fraudsters-suspender truncate-cognito
 
 ## An Unpaid Tech Debt
 
-When I developed this app, there was a tech debt that was too risky to pay considering the development time limit. Supposedly Cognito was the only source of truth of a user's enabled/disabled status.
+Supposedly, Cognito was the only source of truth of a user's enabled/disabled status, but that was a tech debt that was too risky to pay considering the short development time limit.
 
 So, the app also updated the `users.is_enabled` field in the PostgreSQL database.
 
