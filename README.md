@@ -10,7 +10,7 @@ Please learn the Commands section below for the explanations of each command.
 
 The `suspend` command demonstrates the fast batch update process to Amazon Cognito and PostgreSQL database simultaneously by leveraging Go's concurrency.
 
-This repo is the rewrite of the original version in which the code was part of the whole User service repository and it's not open source.
+This repo is the rewrite of the original version in which the code was part of the whole User service repository and it is not open source.
 
 > *Note: the original version run as a job worker in a EKS cluster against RDS/PostgreSQL and Cognito in a shared private subnet, it was able to process 1,000 users data in less than 1 minute.*
 
@@ -30,7 +30,7 @@ Clone this repository in your Go's `/src` directory.
 
 ### Set up Environment Variables
 
-Copy the `/.env.example` as `/.env` then fill out the new file with the real values. You can leave the values of `AMAZON_COGNITO_MAX_RPS*` vars as they are if you're not sure about them.
+Copy the `/.env.example` as `/.env` then fill out the new file with the real values. You can leave the values of `AMAZON_COGNITO_MAX_RPS*` vars as they are if you are not sure about them.
 
 ### Install
 
@@ -74,7 +74,7 @@ tt-fraudsters-suspender suspend --source-file=$HOME/Downloads/fraudsters.txt
 
 AWS does not seem to provide a tool for us to truncate a Cognito user pool. So, you can use this command to clean up your test Cognito user pool in case you want to start over from fresh.
 
-> WARNING: make sure that you don't put the user pool of real or production systems in the `/.env` file.
+> WARNING: make sure that you do not put the user pool of real or production systems in the `/.env` file.
 
 Command example:
 ```
