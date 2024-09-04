@@ -6,8 +6,8 @@ package cmd
 import (
 	"context"
 	"log"
-	"main/internal/cognito"
 	"os"
+	"tt_fraudsters_suspender/internal/datastores/cognito"
 
 	"github.com/spf13/cobra"
 )

@@ -1,4 +1,4 @@
-module main
+module tt_fraudsters_suspender
 
 go 1.22.3
 

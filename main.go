@@ -2,7 +2,7 @@ package main
 
 import (
 	"log"
-	"main/cmd"
+	"tt_fraudsters_suspender/cmd"
 
 	"github.com/joho/godotenv"
 )

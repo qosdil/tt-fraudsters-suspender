@@ -3,10 +3,10 @@ package fake_user_generator
 import (
 	"context"
 	"fmt"
-	"main/internal/cognito"
-	"main/internal/database"
 	"sync"
 	"time"
+	"tt_fraudsters_suspender/internal/datastores/cognito"
+	database "tt_fraudsters_suspender/internal/datastores/postgres"
 
 	"github.com/brianvoe/gofakeit/v7"
 )

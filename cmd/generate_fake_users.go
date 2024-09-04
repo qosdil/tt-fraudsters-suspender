@@ -3,11 +3,11 @@ package cmd
 import (
 	"context"
 	"log"
-	"main/internal/cognito"
-	"main/internal/database"
-	generator "main/internal/fake_users_generator"
 	"os"
 	"time"
+	"tt_fraudsters_suspender/internal/datastores/cognito"
+	database "tt_fraudsters_suspender/internal/datastores/postgres"
+	generator "tt_fraudsters_suspender/internal/pkg/fake_users_generator"
 
 	"github.com/spf13/cobra"
 )

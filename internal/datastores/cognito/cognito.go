@@ -3,9 +3,9 @@ package cognito
 import (
 	"context"
 	"fmt"
-	cfg "main/configs/cognito"
 	"os"
 	"strconv"
+	cfg "tt_fraudsters_suspender/configs/cognito"
 
 	AWSSDKConfig "github.com/aws/aws-sdk-go-v2/config"
 	IdentityProvider "github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider"

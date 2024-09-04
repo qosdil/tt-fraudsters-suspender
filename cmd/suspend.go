@@ -3,11 +3,11 @@ package cmd
 import (
 	"context"
 	"log"
-	"main/internal/cognito"
-	"main/internal/database"
-	susp "main/internal/suspender"
 	"os"
 	"time"
+	"tt_fraudsters_suspender/internal/datastores/cognito"
+	database "tt_fraudsters_suspender/internal/datastores/postgres"
+	susp "tt_fraudsters_suspender/internal/pkg/suspender"
 
 	"github.com/spf13/cobra"
 )

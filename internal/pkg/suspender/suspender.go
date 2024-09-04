@@ -5,11 +5,11 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"main/internal/cognito"
-	"main/internal/database"
 	"os"
 	"sync"
 	"time"
+	"tt_fraudsters_suspender/internal/datastores/cognito"
+	database "tt_fraudsters_suspender/internal/datastores/postgres"
 
 	"github.com/google/uuid"
 )
@@ -21,7 +21,6 @@ func (s *Suspender) BatchSuspend(ctx context.Context, buf bytes.Buffer, status B
 	var wg sync.WaitGroup
 	var userID string
 	var err error
-
 
 	for scanner.Scan() {
 		wg.Add(1)
