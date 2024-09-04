@@ -65,11 +65,21 @@ tt-fraudsters-suspender generate-fake-users --num-users=1000 --dest-file=$HOME/D
 
 This command will read the text file that we provide and then update each user's enabled/disabled status on Cognito and in the database.
 
+Command example:
+```
+tt-fraudsters-suspender suspend --source-file=$HOME/Downloads/fraudsters.txt
+```
+
 ### Truncate Cognito User Pool
 
-This command is to clean up your test Cognito user pool in case you want to start over from fresh.
+AWS does not seem to provide a tool for us to truncate a Cognito user pool. So, you can use this command to clean up your test Cognito user pool in case you want to start over from fresh.
 
 > WARNING: make sure that you don't put the user pool of real or production systems in the `/.env` file.
+
+Command example:
+```
+tt-fraudsters-suspender truncate-cognito
+```
 
 ## An Unpaid Tech Debt
 
