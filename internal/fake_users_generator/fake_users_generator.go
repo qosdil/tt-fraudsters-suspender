@@ -3,10 +3,9 @@ package fake_user_generator
 import (
 	"context"
 	"fmt"
+	cognitoCfg "main/configs/cognito"
 	"main/internal/cognito"
 	"main/internal/database"
-	"os"
-	"strconv"
 	"sync"
 	"time"
 
@@ -48,7 +47,7 @@ func (gen *FakeUsersGenerator) Generate(ctx context.Context, numUsers int) (batc
 	creationStatuses := make(chan CreationStatus, numUsers)
 	var wg sync.WaitGroup
 
-	rowsPerChunk, err := gen.getRowsPerChunk()
+	rowsPerChunk, err := cognitoCfg.GetRowsPerChunk()
 	if err != nil {
 		return batchText, err
 	}
@@ -86,22 +85,6 @@ func (gen *FakeUsersGenerator) Generate(ctx context.Context, numUsers int) (batc
 	return batchText, nil
 }
 
-func (gen *FakeUsersGenerator) getRowsPerChunk() (rowsPerChunk float32, err error) {
-	cognitoMaxRPS64, err := strconv.ParseFloat(os.Getenv(envCognitoMaxRPS), 32)
-	if err != nil {
-		return 0, fmt.Errorf("failed to parse env var of %s: %s", envCognitoMaxRPS, err.Error())
-	}
-	cognitoMaxRPS := float32(cognitoMaxRPS64)
-
-	cognitoMaxRPSChunkRatio64, err := strconv.ParseFloat(os.Getenv(envCognitoMaxRPSChunkRatio), 32)
-	if err != nil {
-		return 0, fmt.Errorf("failed to parse env var of %s: %s", envCognitoMaxRPSChunkRatio, err.Error())
-	}
-	cognitoMaxRPSChunkRatio := float32(cognitoMaxRPSChunkRatio64)
-
-	return cognitoMaxRPS * cognitoMaxRPSChunkRatio, nil
-}
-
 func NewFakeUsersGenerator(cognito *cognito.Cognito, sqlDB *database.Database) *FakeUsersGenerator {
 	s := new(FakeUsersGenerator)
 	s.Cognito = cognito
@@ -110,11 +93,6 @@ func NewFakeUsersGenerator(cognito *cognito.Cognito, sqlDB *database.Database) *
 }
 
 var numChunkRows float32
-
-const (
-	envCognitoMaxRPS           = "AMAZON_COGNITO_MAX_RPS"
-	envCognitoMaxRPSChunkRatio = "AMAZON_COGNITO_MAX_RPS_CHUNK_RATIO"
-)
 
 type CreationStatus struct {
 	ID    string

@@ -5,10 +5,10 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	cognitoCfg "main/configs/cognito"
 	"main/internal/cognito"
 	"main/internal/database"
 	"os"
-	"strconv"
 	"sync"
 	"time"
 
@@ -23,7 +23,7 @@ func (s *Suspender) BatchSuspend(ctx context.Context, buf bytes.Buffer, status B
 	var userID string
 	var err error
 
-	rowsPerChunk, err := s.getRowsPerChunk()
+	rowsPerChunk, err := cognitoCfg.GetRowsPerChunk()
 	if err != nil {
 		return status, err
 	}
@@ -73,22 +73,6 @@ func (s *Suspender) ChanSuspend(ctx context.Context, userID string, suspensionSt
 	suspensionStatus <- SuspensionStatus{UserID: userID}
 	numChunkRows--
 	return nil
-}
-
-func (s *Suspender) getRowsPerChunk() (rowsPerChunk float32, err error) {
-	cognitoMaxRPS64, err := strconv.ParseFloat(os.Getenv(envCognitoMaxRPS), 32)
-	if err != nil {
-		return 0, fmt.Errorf("failed to parse env var of %s: %s", envCognitoMaxRPS, err.Error())
-	}
-	cognitoMaxRPS := float32(cognitoMaxRPS64)
-
-	cognitoMaxRPSChunkRatio64, err := strconv.ParseFloat(os.Getenv(envCognitoMaxRPSChunkRatio), 32)
-	if err != nil {
-		return 0, fmt.Errorf("failed to parse env var of %s: %s", envCognitoMaxRPSChunkRatio, err.Error())
-	}
-	cognitoMaxRPSChunkRatio := float32(cognitoMaxRPSChunkRatio64)
-
-	return cognitoMaxRPS * cognitoMaxRPSChunkRatio, nil
 }
 
 func (s *Suspender) Suspend(ctx context.Context, userID string) (err error) {
@@ -145,9 +129,7 @@ func NewSuspender(cognito *cognito.Cognito, sqlDB *database.Database) *Suspender
 }
 
 const (
-	DoneMsg                    = "batch suspension done, # of records: %d, # of successful: %d, # of failed: %d\n"
-	envCognitoMaxRPS           = "AMAZON_COGNITO_MAX_RPS"
-	envCognitoMaxRPSChunkRatio = "AMAZON_COGNITO_MAX_RPS_CHUNK_RATIO"
+	DoneMsg = "batch suspension done, # of records: %d, # of successful: %d, # of failed: %d\n"
 )
 
 type BatchBuffer struct {
