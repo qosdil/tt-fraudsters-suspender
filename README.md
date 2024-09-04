@@ -28,6 +28,10 @@ Make sure that your system has met the prerequisites above before running the fo
 
 Clone this repository in your Go's `/src` directory.
 
+### Create User Table
+
+Use the `/scripts/database/schema.sql` file to create the `users` table in your PostgreSQL instance.
+
 ### Set up Environment Variables
 
 Copy the `/.env.example` as `/.env` then fill out the new file with the real values. You can leave the values of `AMAZON_COGNITO_MAX_RPS*` vars as they are if you are not sure about them.
