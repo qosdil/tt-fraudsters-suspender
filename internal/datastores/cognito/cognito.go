@@ -9,13 +9,12 @@ import (
 
 	AWSSDKConfig "github.com/aws/aws-sdk-go-v2/config"
 	IdentityProvider "github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider"
-	"github.com/aws/aws-sdk-go/aws"
 )
 
 func (c *Cognito) CreateUser(ctx context.Context, email string) (id string, err error) {
 	user, err := c.Client.AdminCreateUser(ctx, &IdentityProvider.AdminCreateUserInput{
-		UserPoolId: aws.String(c.Config.PoolID),
-		Username:   aws.String(email),
+		UserPoolId: &c.Config.PoolID,
+		Username:   &email,
 	})
 	if err != nil {
 		return "", err
@@ -27,8 +26,8 @@ func (c *Cognito) CreateUser(ctx context.Context, email string) (id string, err 
 
 func (c *Cognito) DeleteUser(ctx context.Context, id string) (err error) {
 	_, err = c.Client.AdminDeleteUser(ctx, &IdentityProvider.AdminDeleteUserInput{
-		UserPoolId: aws.String(c.Config.PoolID),
-		Username:   aws.String(id),
+		UserPoolId: &c.Config.PoolID,
+		Username:   &id,
 	})
 	if err != nil {
 		return err
@@ -38,8 +37,8 @@ func (c *Cognito) DeleteUser(ctx context.Context, id string) (err error) {
 
 func (c *Cognito) DisableUser(ctx context.Context, username string) (err error) {
 	if _, err = c.Client.AdminDisableUser(ctx, &IdentityProvider.AdminDisableUserInput{
-		UserPoolId: aws.String(c.Config.PoolID),
-		Username:   aws.String(username),
+		UserPoolId: &c.Config.PoolID,
+		Username:   &username,
 	}); err != nil {
 		return err
 	}
@@ -48,8 +47,8 @@ func (c *Cognito) DisableUser(ctx context.Context, username string) (err error) 
 
 func (c *Cognito) EnableUser(ctx context.Context, username string) (err error) {
 	if _, err = c.Client.AdminEnableUser(ctx, &IdentityProvider.AdminEnableUserInput{
-		UserPoolId: aws.String(c.Config.PoolID),
-		Username:   aws.String(username),
+		UserPoolId: &c.Config.PoolID,
+		Username:   &username,
 	}); err != nil {
 		return err
 	}
@@ -74,7 +73,7 @@ func (c *Cognito) Truncate(ctx context.Context) (int, error) {
 
 	// Cannot retrieve more than 60, default is 60
 	users, err := c.Client.ListUsers(ctx, &IdentityProvider.ListUsersInput{
-		UserPoolId: aws.String(c.Config.PoolID),
+		UserPoolId: &c.Config.PoolID,
 	})
 	if err != nil {
 		return 0, err
@@ -82,8 +81,8 @@ func (c *Cognito) Truncate(ctx context.Context) (int, error) {
 
 	for _, user := range users.Users {
 		_, err := c.Client.AdminDeleteUser(ctx, &IdentityProvider.AdminDeleteUserInput{
-			UserPoolId: aws.String(c.Config.PoolID),
-			Username:   aws.String(*user.Username),
+			UserPoolId: &c.Config.PoolID,
+			Username:   user.Username,
 		})
 		if err != nil {
 			return 0, err
