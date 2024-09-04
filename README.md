@@ -1,22 +1,16 @@
 # tt-fraudsters-suspender
 
-**tt-fraudsters-suspender** is a Go-based CLI application that consists of three commands.
+**tt-fraudsters-suspender** is a Go-based CLI application. The main purpose of this app is to demonstrate the fast batch update process to Amazon Cognito and PostgreSQL database simultaneously by leveraging Go's concurrency.
 
-1. fake-users-generator
-2. suspend
-3. truncate-cognito
+This repo is the rewrite of the original version in which the code was a part of the whole closed-source User service repository.
 
-Please learn the Commands section below for the explanations of each command.
+On the business aspect, this app is used to suspend hundreds of fraudster users in the platform to prevent them to sign in and get benefits from the available marketing programs (e.g. promo codes).
 
-The main purpose of this app is to demonstrate the fast batch update process to Amazon Cognito and PostgreSQL database simultaneously by leveraging Go's concurrency.
-
-This repo is the rewrite of the original version in which the code was part of the whole User service repository and it is not open source.
-
-> *Note: the original version run as a job worker in a EKS cluster against RDS/PostgreSQL and Cognito in a shared private subnet, it was able to process 1,000 users data in less than 1 minute.*
+> *Note: the original version run as a job worker in a EKS cluster against Cognito and RDS/PostgreSQL in a shared private subnet.*
 
 ## Prerequisites
 
-* Go v1.22 or newer
+* Go v1.22 or newer with `$GOPATH/bin` included in the `$PATH` environment variable
 * Amazon Cognito
 * PostgreSQL v14 or newer
 
@@ -26,7 +20,10 @@ Make sure that your system has met the prerequisites above before running the fo
 
 ### Clone This Repository
 
-Clone this repository in your Go's `/src` directory.
+Clone this repository anywhere in your system. For example:
+```
+git clone <this_repo>
+```
 
 ### Create User Table
 
@@ -44,13 +41,11 @@ Go to the app root directory, then do the Go install command. For example:
 go install .
 ```
 
-Then the `tt-fraudsters-suspender` app will be available in your Go bin directory.
-
 > Note: If you update the `/.env` file, then you need to run the `go install .` command again.
 
 ### Run the App
 
-By assuming that Go bin directory is included in your system's `$PATH` environment variable, you can run the `tt-fraudsters-suspender` from any directories.
+By assuming that `$GOPATH/bin` is included in your system's `$PATH` environment variable, you can run `tt-fraudsters-suspender` from any directories.
 
 Please continue with next section for more details on how to work with app.
 
@@ -58,7 +53,7 @@ Please continue with next section for more details on how to work with app.
 
 ### Generate Fake Users
 
-This command generates N numbers of fake users (assume they all are fraudsters of the system) and will write to Cognito, PostgreSQL database and a text file.
+This command generates N numbers of fake users (assume they all are fraudsters) and will write to Cognito, PostgreSQL database and a text file.
 
 The following example will generate 1000 fake users:
 ```
@@ -78,7 +73,7 @@ tt-fraudsters-suspender suspend --source-file=$HOME/Downloads/fraudsters.txt
 
 AWS does not seem to provide a tool for us to truncate a Cognito user pool. So, you can use this command to clean up your test Cognito user pool in case you want to start over from fresh.
 
-> WARNING: make sure that you do not put the user pool of real or production systems in the `/.env` file.
+> WARNING: make sure that you do not put the user pool of a real or production system in the `/.env` file.
 
 Command example:
 ```
