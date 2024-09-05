@@ -16,7 +16,7 @@ import (
 
 func (s *Suspender) BatchSuspend(ctx context.Context, buf bytes.Buffer, status BatchSuspensionStatus) (BatchSuspensionStatus, error) {
 	scanner := bufio.NewScanner(&buf)
-	suspensionStatuses := make(chan SuspensionStatus, status.NumRecords)
+	suspensionStatuses := make(chan SuspensionStatus, status.NumRows)
 
 	var wg sync.WaitGroup
 	var userID string
@@ -104,7 +104,7 @@ func (s *Suspender) CreateBufFromFile(ctx context.Context, sourceFile string) (b
 		if _, err := uuid.Parse(userID); err != nil {
 			return batchBuffer, fmt.Errorf(`"%s" on line %d is not a valid UUID v4`, userID, line)
 		}
-		batchBuffer.NumRecords++
+		batchBuffer.NumRows++
 
 		// Collect user IDs
 		fmt.Fprintln(&batchBuffer.Buf, userID)
@@ -123,16 +123,16 @@ func NewSuspender(cognito *cognito.Cognito, sqlDB *database.Database) *Suspender
 }
 
 const (
-	DoneMsg = "batch suspension done, # of records: %d, # of successful: %d, # of failed: %d\n"
+	DoneMsg = "batch suspension done, # of rows: %d, # of successful: %d, # of failed: %d\n"
 )
 
 type BatchBuffer struct {
-	Buf        bytes.Buffer
-	NumRecords int
+	Buf     bytes.Buffer
+	NumRows int
 }
 
 type BatchSuspensionStatus struct {
-	NumRecords    int
+	NumRows       int
 	NumSuccessful int
 	NumFailed     int
 	Failures      []error

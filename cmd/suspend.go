@@ -71,9 +71,9 @@ fraudster_suspender suspend --source-file=/Users/john/Downloads/fraudsters.txt`,
 			log.Fatal(err.Error())
 		}
 
-		log.Printf("start suspending %d users...", batchBuffer.NumRecords)
+		log.Printf("start suspending %d users...", batchBuffer.NumRows)
 		batchStatus, err := suspender.BatchSuspend(ctx, batchBuffer.Buf, susp.BatchSuspensionStatus{
-			NumRecords: batchBuffer.NumRecords,
+			NumRows: batchBuffer.NumRows,
 		})
 		if err != nil {
 			log.Fatalf("failed to suspend in batch: %s", err.Error())
@@ -85,7 +85,7 @@ fraudster_suspender suspend --source-file=/Users/john/Downloads/fraudsters.txt`,
 			log.Println(failure.Error())
 		}
 
-		log.Printf(susp.DoneMsg, batchStatus.NumRecords, batchStatus.NumSuccessful, batchStatus.NumFailed)
+		log.Printf(susp.DoneMsg, batchStatus.NumRows, batchStatus.NumSuccessful, batchStatus.NumFailed)
 		log.Printf("done in %s\n", elapsed)
 	},
 }
