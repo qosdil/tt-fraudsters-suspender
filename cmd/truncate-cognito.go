@@ -4,10 +4,7 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"context"
 	"log"
-	"os"
-	"tt-fraudsters-suspender/internal/datastores/cognito"
 
 	"github.com/spf13/cobra"
 )
@@ -23,24 +20,8 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		var err error
-		cognito, err := cognito.NewCognito(cognito.Config{
-			Region: os.Getenv("AMAZON_COGNITO_CONFIG_REGION"),
-			PoolID: os.Getenv("AMAZON_COGNITO_USER_POOL_ID"),
-		})
-		if err != nil {
-			log.Fatalf("error on instantiating Cognito: %s", err.Error())
-		}
-
-		ctx := context.Background()
-
-		// Get Cognito client
-		if cognito.Client, err = cognito.GetClient(ctx); err != nil {
-			log.Fatalf("error on getting a Cognito client: %s", err.Error())
-		}
-
-		log.Printf("start truncating Cognito user pool %s...", cognito.Config.PoolID)
-		numAffected, err := cognito.Truncate(ctx)
+		log.Printf("start truncating Cognito user pool %s...", cognitoConn.Config.PoolID)
+		numAffected, err := cognitoConn.Truncate(ctx)
 		if err != nil {
 			log.Fatalf("error on truncating Cognito user pool: %s", err.Error())
 		}

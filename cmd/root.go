@@ -1,7 +1,11 @@
 package cmd
 
 import (
+	"context"
+	"log"
 	"os"
+	"tt-fraudsters-suspender/internal/datastores/cognito"
+	database "tt-fraudsters-suspender/internal/datastores/postgres"
 
 	"github.com/spf13/cobra"
 )
@@ -24,9 +28,51 @@ to quickly create a Cobra application.`,
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
+	// Set "cognitoConn" as a Cognito connection in "cmd" package
+	ctx = context.Background()
+	setCognitoConnection()
+
 	err := rootCmd.Execute()
 	if err != nil {
 		os.Exit(1)
+	}
+}
+
+var (
+	cognitoConn *cognito.Cognito
+	ctx         context.Context
+	dbConn      *database.Database
+)
+
+// setCognitoConnection returns a Cognito connection
+func setCognitoConnection() {
+	var err error
+	cognitoConn, err = cognito.NewCognito(cognito.Config{
+		Region: os.Getenv("AMAZON_COGNITO_CONFIG_REGION"),
+		PoolID: os.Getenv("AMAZON_COGNITO_USER_POOL_ID"),
+	})
+	if err != nil {
+		log.Fatalf("error on instantiating Cognito: %s", err.Error())
+	}
+
+	// Get Cognito client
+	if cognitoConn.Client, err = cognitoConn.GetClient(ctx); err != nil {
+		log.Fatalf("error on getting a Cognito client: %s", err.Error())
+	}
+}
+
+func setDatabaseConnection() {
+	var err error
+	dbConn = database.NewDatabase(database.Config{
+		Host:     os.Getenv("DB_HOST"),
+		Port:     os.Getenv("DB_PORT"),
+		User:     os.Getenv("DB_USER"),
+		Password: os.Getenv("DB_PASSWORD"),
+		Name:     os.Getenv("DB_NAME"),
+		SSLMode:  os.Getenv("DB_SSL_MODE"),
+	})
+	if dbConn.SqlDB, err = dbConn.Open(); err != nil {
+		log.Fatalf("error on opening a connection to database: %s", err.Error())
 	}
 }
 

@@ -1,12 +1,8 @@
 package cmd
 
 import (
-	"context"
 	"log"
-	"os"
 	"time"
-	"tt-fraudsters-suspender/internal/datastores/cognito"
-	database "tt-fraudsters-suspender/internal/datastores/postgres"
 	susp "tt-fraudsters-suspender/internal/pkg/suspender"
 
 	"github.com/spf13/cobra"
@@ -35,37 +31,10 @@ Command example:
 fraudster_suspender suspend --source-file=/Users/john/Downloads/fraudsters.txt`,
 	Run: func(cmd *cobra.Command, args []string) {
 		start := time.Now()
-		var err error
-		cognito, err := cognito.NewCognito(cognito.Config{
-			Region: os.Getenv("AMAZON_COGNITO_CONFIG_REGION"),
-			PoolID: os.Getenv("AMAZON_COGNITO_USER_POOL_ID"),
-		})
-		if err != nil {
-			log.Fatalf("error on instantiating Cognito: %s", err.Error())
-		}
+		setDatabaseConnection()
+		defer dbConn.SqlDB.Close()
 
-		ctx := context.Background()
-
-		// Get Cognito client
-		if cognito.Client, err = cognito.GetClient(ctx); err != nil {
-			log.Fatalf("error on getting a Cognito client: %s", err.Error())
-		}
-
-		// Create a database connection
-		db := database.NewDatabase(database.Config{
-			Host:     os.Getenv("DB_HOST"),
-			Port:     os.Getenv("DB_PORT"),
-			User:     os.Getenv("DB_USER"),
-			Password: os.Getenv("DB_PASSWORD"),
-			Name:     os.Getenv("DB_NAME"),
-			SSLMode:  os.Getenv("DB_SSL_MODE"),
-		})
-		if db.SqlDB, err = db.Open(); err != nil {
-			log.Fatalf("error on opening a connection to database: %s", err.Error())
-		}
-		defer db.SqlDB.Close()
-
-		suspender := susp.NewSuspender(cognito, db)
+		suspender := susp.NewSuspender(cognitoConn, dbConn)
 		batchBuffer, err := suspender.CreateBufFromFile(ctx, sourceFile)
 		if err != nil {
 			log.Fatal(err.Error())

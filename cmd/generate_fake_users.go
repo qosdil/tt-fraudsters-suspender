@@ -1,12 +1,9 @@
 package cmd
 
 import (
-	"context"
 	"log"
 	"os"
 	"time"
-	"tt-fraudsters-suspender/internal/datastores/cognito"
-	database "tt-fraudsters-suspender/internal/datastores/postgres"
 	generator "tt-fraudsters-suspender/internal/pkg/fake_users_generator"
 
 	"github.com/spf13/cobra"
@@ -30,38 +27,11 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		start := time.Now()
-		var err error
-		cognito, err := cognito.NewCognito(cognito.Config{
-			Region: os.Getenv("AMAZON_COGNITO_CONFIG_REGION"),
-			PoolID: os.Getenv("AMAZON_COGNITO_USER_POOL_ID"),
-		})
-		if err != nil {
-			log.Fatalf("error on instantiating Cognito: %s", err.Error())
-		}
-
-		ctx := context.Background()
-
-		// Get Cognito client
-		if cognito.Client, err = cognito.GetClient(ctx); err != nil {
-			log.Fatalf("error on getting a Cognito client: %s", err.Error())
-		}
-
-		// Create a database connection
-		db := database.NewDatabase(database.Config{
-			Host:     os.Getenv("DB_HOST"),
-			Port:     os.Getenv("DB_PORT"),
-			User:     os.Getenv("DB_USER"),
-			Password: os.Getenv("DB_PASSWORD"),
-			Name:     os.Getenv("DB_NAME"),
-			SSLMode:  os.Getenv("DB_SSL_MODE"),
-		})
-		if db.SqlDB, err = db.Open(); err != nil {
-			log.Fatalf("error on opening a connection to database: %s", err.Error())
-		}
-		defer db.SqlDB.Close()
+		setDatabaseConnection()
+		defer dbConn.SqlDB.Close()
 
 		log.Printf("start generating %d fake users...", numUsers)
-		gen := generator.NewFakeUsersGenerator(cognito, db)
+		gen := generator.NewFakeUsersGenerator(cognitoConn, dbConn)
 		batchText, err := gen.Generate(ctx, numUsers)
 		if err != nil {
 			log.Fatalf("error on generating fake users: %s", err.Error())
