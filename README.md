@@ -63,7 +63,7 @@ tt-fraudsters-suspender generate-fake-users --num-users=1000 --dest-file=$HOME/D
 
 ### Suspend Fraudster Users
 
-This command will read the text file that we provide and then update each user's status to `DISABLED` on Cognito and in the database.
+This command will read the text file that we provide and then update each user's `Account status` to `Disabled` on Cognito and `is_enabled = FALSE` in the database.
 
 Command example:
 ```
