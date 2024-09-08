@@ -12,6 +12,7 @@ On the business aspect, this app is used to suspend hundreds of fraudster users 
 
 * Go v1.22 or newer with `$GOPATH/bin` included in the `$PATH` environment variable
 * Amazon Cognito
+* For the IAM user, grant these permissions againts the targeted user pool: `AdminCreateUser`, `AdminDisableUser`, `AdminEnableUser`
 * PostgreSQL v14 or newer
 
 ## Installation
@@ -74,6 +75,8 @@ tt-fraudsters-suspender suspend --source-file=$HOME/Downloads/fraudsters.txt
 AWS does not seem to provide a tool for us to truncate a Cognito user pool. So, you can use this command to clean up your test Cognito user pool in case you want to start over from fresh.
 
 > WARNING: make sure that you do not put the user pool of a real or production system in the `/.env` file.
+
+Before running the command, you need to add the IAM permissions of `ListUsers` and `AdminDeleteUser` againts the targeted user pool.
 
 Command example:
 ```
