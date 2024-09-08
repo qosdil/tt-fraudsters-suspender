@@ -62,7 +62,6 @@ func setCognitoConnection() {
 }
 
 func setDatabaseConnection() {
-	var err error
 	dbConn = database.NewDatabase(database.Config{
 		Host:     os.Getenv("DB_HOST"),
 		Port:     os.Getenv("DB_PORT"),
@@ -71,8 +70,17 @@ func setDatabaseConnection() {
 		Name:     os.Getenv("DB_NAME"),
 		SSLMode:  os.Getenv("DB_SSL_MODE"),
 	})
-	if dbConn.SqlDB, err = dbConn.Open(); err != nil {
-		log.Fatalf("error on opening a connection to database: %s", err.Error())
+
+	var err error
+	errMsg := "error on opening a connection to database: %s"
+
+	dbConn.SqlDB, err = dbConn.Open()
+	if err != nil {
+		log.Fatalf(errMsg, err.Error())
+	}
+	err = dbConn.SqlDB.Ping()
+	if err != nil {
+		log.Fatalf(errMsg, err.Error())
 	}
 }
 
