@@ -113,6 +113,26 @@ func (s *Suspender) CreateBufFromFile(ctx context.Context, sourceFile string) (b
 	return batchBuffer, nil
 }
 
+// SeqBatchSuspend suspends users in batch sequentially
+func (s *Suspender) SeqBatchSuspend(ctx context.Context, buf bytes.Buffer, status BatchSuspensionStatus) (BatchSuspensionStatus, error) {
+	scanner := bufio.NewScanner(&buf)
+	var userID string
+	var err error
+	for scanner.Scan() {
+		userID = scanner.Text()
+		if err = s.Suspend(ctx, userID); err == nil {
+			status.NumSuccessful++
+			continue
+		}
+
+		// Handle error
+		status.NumFailed++
+		err = fmt.Errorf("failed suspending user %s: %s", userID, err.Error())
+		status.Failures = append(status.Failures, err)
+	}
+	return status, nil
+}
+
 var numChunkRows float32
 
 func NewSuspender(cognito *cognito.Cognito, sqlDB *database.Database) *Suspender {
