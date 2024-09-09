@@ -14,15 +14,14 @@ import (
 // ChanCreateUser creates user with channel
 func (gen *FakeUsersGenerator) ChanCreateUser(ctx context.Context, email string, creationStatuses chan CreationStatus, wg *sync.WaitGroup) (err error) {
 	defer wg.Done()
+	numChunkRows--
 	id, err := gen.CreateUser(ctx, email)
 	if err != nil {
 		creationStatuses <- CreationStatus{ID: id, Error: err}
-		numChunkRows--
 		return err
 	}
 
 	creationStatuses <- CreationStatus{ID: id}
-	numChunkRows--
 	return nil
 }
 
