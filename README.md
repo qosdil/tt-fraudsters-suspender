@@ -59,9 +59,14 @@ The following example will generate 1000 fake users:
 
 This command will read the text file that we provide and then update each user's `Account status` to `Disabled` on Cognito and `is_enabled = FALSE` in the database.
 
-Command example:
+The `suspend` command updates multiple rows with concurrency. For example:
 ```
 ./tt-fraudsters-suspender suspend --source-file=$HOME/Downloads/fraudsters.txt
+```
+
+To see the difference on the execution time with the sequential updates, use the `seq-suspend` command. For example:
+```
+./tt-fraudsters-suspender seq-suspend --source-file=$HOME/Downloads/fraudsters.txt
 ```
 
 ### Truncate Cognito User Pool
