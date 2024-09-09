@@ -74,7 +74,7 @@ tt-fraudsters-suspender suspend --source-file=$HOME/Downloads/fraudsters.txt
 
 AWS does not seem to provide a tool for us to truncate a Cognito user pool. So, you can use this command to clean up your test Cognito user pool in case you want to start over from fresh.
 
-But, unlike the other two commands, the `truncate` command performs slow on the large dataset because we cannot implement a concurrency in the logic.
+But, unlike the other two commands, the `truncate` command performs slow on the large dataset because the logic has not been implemented with concurrency.
 
 > WARNING: make sure that you do not put the user pool of a real or production system in the `/.env` file.
 
