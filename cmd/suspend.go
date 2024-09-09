@@ -10,7 +10,8 @@ import (
 
 func init() {
 	rootCmd.AddCommand(suspendCmd)
-	suspendCmd.Flags().StringVarP(&sourceFile, "source-file", "s", "", "Source file to read from")
+	suspendCmd.Flags().StringVarP(&sourceFile, "source-file", "s", "", "Source file to read from (required)")
+	suspendCmd.MarkFlagRequired("source-file")
 }
 
 var sourceFile string

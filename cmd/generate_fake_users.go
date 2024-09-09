@@ -11,8 +11,10 @@ import (
 
 func init() {
 	rootCmd.AddCommand(generateFakeUsersCmd)
-	generateFakeUsersCmd.Flags().IntVarP(&numUsers, "num-users", "n", 0, "Number of users to be generated")
-	generateFakeUsersCmd.Flags().StringVarP(&destFile, "dest-file", "d", "", "Destination file")
+	generateFakeUsersCmd.Flags().IntVarP(&numUsers, "num-users", "n", 0, "Number of users to be generated (required)")
+	generateFakeUsersCmd.MarkFlagRequired("num-users")
+	generateFakeUsersCmd.Flags().StringVarP(&destFile, "dest-file", "d", "", "Destination file (required)")
+	generateFakeUsersCmd.MarkFlagRequired("dest-file")
 }
 
 // generateFakeUsersCmd represents the generateFakeUsers command
