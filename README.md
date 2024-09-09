@@ -10,7 +10,7 @@ On the business aspect, this app is used to suspend hundreds of fraudster users 
 
 ## Prerequisites
 
-* Go v1.22 or newer with `$GOPATH/bin` included in the `$PATH` environment variable
+* Go v1.22 or newer
 * Amazon Cognito
 * For the IAM user, grant these permissions againts the targeted user pool: `AdminCreateUser`, `AdminDisableUser`, `AdminEnableUser`
 * PostgreSQL v14 or newer
@@ -34,21 +34,15 @@ Use the `/scripts/database/schema.sql` file to create the `users` table in your 
 
 Copy the `/.env.example` as `/.env` then fill out the new file with the real values. You can leave the values of `AMAZON_COGNITO_MAX_RPS*` vars as they are if you are not sure about them.
 
-### Install
+### Build
 
-Go to the app root directory, then do the Go install command. For example:
+Go to the app root directory, then build the app. For example:
 
 ```
-go install .
+go build -o .
 ```
 
-> Note: If you update the `/.env` file, then you need to run the `go install .` command again.
-
-### Run the App
-
-By assuming that `$GOPATH/bin` is included in your system's `$PATH` environment variable, you can run `tt-fraudsters-suspender` from any directories.
-
-Please continue with next section for more details on how to work with app.
+That will output the binary file in the same directory.
 
 ## Commands
 
@@ -58,7 +52,7 @@ To simulate the presense of fraudsters in your system, you can use this command 
 
 The following example will generate 1000 fake users:
 ```
-tt-fraudsters-suspender generate-fake-users --num-users=1000 --dest-file=$HOME/Downloads/fraudsters.txt
+./tt-fraudsters-suspender generate-fake-users --num-users=1000 --dest-file=$HOME/Downloads/fraudsters.txt
 ```
 
 ### Suspend Fraudster Users
@@ -67,7 +61,7 @@ This command will read the text file that we provide and then update each user's
 
 Command example:
 ```
-tt-fraudsters-suspender suspend --source-file=$HOME/Downloads/fraudsters.txt
+./tt-fraudsters-suspender suspend --source-file=$HOME/Downloads/fraudsters.txt
 ```
 
 ### Truncate Cognito User Pool
@@ -82,7 +76,7 @@ Before running the command, you need to add the IAM permissions of `ListUsers` a
 
 Command example:
 ```
-tt-fraudsters-suspender truncate-cognito
+./tt-fraudsters-suspender truncate-cognito
 ```
 
 ## An Unpaid Tech Debt
