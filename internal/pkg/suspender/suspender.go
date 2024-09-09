@@ -28,11 +28,11 @@ func (s *Suspender) BatchSuspend(ctx context.Context, buf bytes.Buffer, status B
 
 		// Wait for a second if number of chunked rows exceeds rowsPerChunk
 		// This is to overcome RPS limitation on Cognito
-		if numChunkRows >= s.Cognito.GetRowsPerChunk() {
+		if numChunkedRows >= s.Cognito.GetRowsPerChunk() {
 			time.Sleep(time.Second)
 		}
 
-		numChunkRows++
+		numChunkedRows++
 		go s.ChanSuspend(ctx, userID, suspensionStatuses, &wg)
 	}
 
@@ -58,7 +58,7 @@ func (s *Suspender) BatchSuspend(ctx context.Context, buf bytes.Buffer, status B
 // ChanSuspend suspends with channel
 func (s *Suspender) ChanSuspend(ctx context.Context, userID string, suspensionStatus chan SuspensionStatus, wg *sync.WaitGroup) (err error) {
 	defer wg.Done()
-	numChunkRows--
+	numChunkedRows--
 	if err = s.Suspend(ctx, userID); err != nil {
 		suspensionStatus <- SuspensionStatus{UserID: userID, Error: err}
 		return err
@@ -132,7 +132,7 @@ func (s *Suspender) SeqBatchSuspend(ctx context.Context, buf bytes.Buffer, statu
 	return status, nil
 }
 
-var numChunkRows float32
+var numChunkedRows float32
 
 func NewSuspender(cognito *cognito.Cognito, sqlDB *database.Database) *Suspender {
 	s := new(Suspender)

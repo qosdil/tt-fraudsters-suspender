@@ -14,7 +14,7 @@ import (
 // ChanCreateUser creates user with channel
 func (gen *FakeUsersGenerator) ChanCreateUser(ctx context.Context, email string, creationStatuses chan CreationStatus, wg *sync.WaitGroup) (err error) {
 	defer wg.Done()
-	numChunkRows--
+	numChunkedRows--
 	id, err := gen.CreateUser(ctx, email)
 	if err != nil {
 		creationStatuses <- CreationStatus{ID: id, Error: err}
@@ -50,11 +50,11 @@ func (gen *FakeUsersGenerator) Generate(ctx context.Context, numUsers int) (batc
 
 		// Wait for a second if number of chunked rows exceeds rowsPerChunk
 		// This is to overcome RPS limitation on Cognito
-		if numChunkRows >= gen.Cognito.GetRowsPerChunk() {
+		if numChunkedRows >= gen.Cognito.GetRowsPerChunk() {
 			time.Sleep(time.Second)
 		}
 
-		numChunkRows++
+		numChunkedRows++
 		go gen.ChanCreateUser(ctx, gofakeit.Email(), creationStatuses, &wg)
 	}
 
@@ -85,7 +85,7 @@ func NewFakeUsersGenerator(cognito *cognito.Cognito, sqlDB *database.Database) *
 	return s
 }
 
-var numChunkRows float32
+var numChunkedRows float32
 
 type CreationStatus struct {
 	ID    string
