@@ -12,17 +12,11 @@ import (
 )
 
 // ChanCreateUser creates user with channel
-func (gen *FakeUsersGenerator) ChanCreateUser(ctx context.Context, email string, creationStatuses chan CreationStatus, wg *sync.WaitGroup) (err error) {
+func (gen *FakeUsersGenerator) ChanCreateUser(ctx context.Context, email string, creationStatuses chan CreationStatus, wg *sync.WaitGroup) {
 	defer wg.Done()
 	numChunkedRows--
 	id, err := gen.CreateUser(ctx, email)
-	if err != nil {
-		creationStatuses <- CreationStatus{ID: id, Error: err}
-		return err
-	}
-
-	creationStatuses <- CreationStatus{ID: id}
-	return nil
+	creationStatuses <- CreationStatus{ID: id, Error: err}
 }
 
 func (gen *FakeUsersGenerator) CreateUser(ctx context.Context, email string) (id string, err error) {

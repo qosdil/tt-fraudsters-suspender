@@ -56,16 +56,13 @@ func (s *Suspender) BatchSuspend(ctx context.Context, buf bytes.Buffer, status B
 }
 
 // ChanSuspend suspends with channel
-func (s *Suspender) ChanSuspend(ctx context.Context, userID string, suspensionStatus chan SuspensionStatus, wg *sync.WaitGroup) (err error) {
+func (s *Suspender) ChanSuspend(ctx context.Context, userID string, suspensionStatus chan SuspensionStatus, wg *sync.WaitGroup) {
 	defer wg.Done()
 	numChunkedRows--
-	if err = s.Suspend(ctx, userID); err != nil {
-		suspensionStatus <- SuspensionStatus{UserID: userID, Error: err}
-		return err
+	suspensionStatus <- SuspensionStatus{
+		UserID: userID,
+		Error:  s.Suspend(ctx, userID),
 	}
-
-	suspensionStatus <- SuspensionStatus{UserID: userID}
-	return nil
 }
 
 func (s *Suspender) Suspend(ctx context.Context, userID string) (err error) {
