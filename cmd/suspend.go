@@ -3,7 +3,7 @@ package cmd
 import (
 	"log"
 	"time"
-	susp "tt-fraudsters-suspender/internal/pkg/suspender"
+	"tt-fraudsters-suspender/internal/pkg/suspender"
 
 	"github.com/spf13/cobra"
 )
@@ -35,14 +35,14 @@ fraudster_suspender suspend --source-file=/Users/john/Downloads/fraudsters.txt`,
 		setDatabaseConnection()
 		defer dbConn.SqlDB.Close()
 
-		suspender := susp.NewSuspender(cognitoConn, dbConn)
-		batchBuffer, err := suspender.CreateBufFromFile(ctx, sourceFile)
+		s := suspender.NewSuspender(cognitoConn, dbConn)
+		batchBuffer, err := s.CreateBufFromFile(ctx, sourceFile)
 		if err != nil {
 			log.Fatal(err.Error())
 		}
 
 		log.Printf("start suspending %d users...", batchBuffer.NumRows)
-		batchStatus, err := suspender.BatchSuspend(ctx, batchBuffer.Buf, susp.BatchSuspensionStatus{
+		batchStatus, err := s.BatchSuspend(ctx, batchBuffer.Buf, suspender.BatchSuspensionStatus{
 			NumRows: batchBuffer.NumRows,
 		})
 		if err != nil {
@@ -55,7 +55,7 @@ fraudster_suspender suspend --source-file=/Users/john/Downloads/fraudsters.txt`,
 			log.Println(failure.Error())
 		}
 
-		log.Printf(susp.DoneMsg, batchStatus.NumRows, batchStatus.NumSuccessful, batchStatus.NumFailed)
+		log.Printf(suspender.DoneMsg, batchStatus.NumRows, batchStatus.NumSuccessful, batchStatus.NumFailed)
 		log.Printf("done in %s\n", elapsed)
 	},
 }
