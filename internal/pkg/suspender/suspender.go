@@ -100,12 +100,12 @@ func (s *Suspender) CreateBufFromFile(ctx context.Context, sourceFile string) (b
 		if _, err := uuid.Parse(userID); err != nil {
 			return batchBuffer, fmt.Errorf(`"%s" on line %d is not a valid UUID v4`, userID, line)
 		}
-		batchBuffer.NumRows++
 
 		// Collect user IDs
 		fmt.Fprintln(&batchBuffer.Buf, userID)
 	}
 
+	batchBuffer.NumRows = line
 	return batchBuffer, nil
 }
 
