@@ -55,7 +55,14 @@ The following example will generate 1000 fake users:
 ./tt-fraudsters-suspender generate-fake-users --num-users=1000 --dest-file=$HOME/Downloads/fraudsters.txt
 ```
 
-### Suspend Fraudster Users
+Example output:
+```
+2024/09/27 15:56:44 start generating 1000 fake users...
+2024/09/27 15:57:25 successfully generated 1000 fake users to Cognito, database and batch text file
+2024/09/27 15:57:25 done in 41.40s
+```
+
+### Suspend Fraudster Users, Fast
 
 This command will read the text file that we provide and then update each user's `Account status` to `Disabled` on Cognito and `is_enabled = FALSE` in the database.
 
@@ -64,9 +71,25 @@ The `suspend` command updates multiple rows with concurrency. For example:
 ./tt-fraudsters-suspender suspend --source-file=$HOME/Downloads/fraudsters.txt
 ```
 
+Example output:
+```
+2024/09/27 16:00:09 start suspending 1000 users...
+2024/09/27 16:00:52 batch suspension done, # of rows: 1000, # of successful: 1000, # of failed: 0
+2024/09/27 16:00:52 done in 43.54s
+```
+
+### Suspend Fraudster Users, Slow
+
 To see the difference on the execution time with the sequential updates, use the `seq-suspend` command. For example:
 ```
 ./tt-fraudsters-suspender seq-suspend --source-file=$HOME/Downloads/fraudsters.txt
+```
+
+Example output:
+```
+2024/09/27 16:13:13 start suspending 1000 users...
+2024/09/27 16:16:05 batch suspension done, # of rows: 1000, # of successful: 1000, # of failed: 0
+2024/09/27 16:16:05 done in 2m51.72s
 ```
 
 ### Truncate Cognito User Pool
