@@ -1,6 +1,6 @@
 # tt-fraudsters-suspender
 
-**tt-fraudsters-suspender** is a Go-based CLI application. The main purpose of this app is to demonstrate the fast batch update process to Amazon Cognito and PostgreSQL database simultaneously by leveraging Go's concurrency.
+**tt-fraudsters-suspender** is a Go-based CLI application. The main purpose of this app is to demonstrate the fast batch update process to Amazon Cognito and PostgreSQL database simultaneously by leveraging Go's concurrency. Expect it processes 1,000 user data rows in less than 1 minute.
 
 This repo is the rewrite of the original version in which the code was a part of the whole closed-source User service repository.
 
