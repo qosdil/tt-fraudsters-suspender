@@ -71,7 +71,9 @@ func (s *Suspender) Suspend(ctx context.Context, userID string) (err error) {
 	}
 	if err := s.Database.DisableUser(userID); err != nil {
 		// Re-enable user on Cognito
-		s.Cognito.EnableUser(ctx, userID)
+		if euErr := s.Cognito.EnableUser(ctx, userID); euErr != nil {
+			return err
+		}
 
 		return err
 	}
