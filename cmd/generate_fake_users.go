@@ -20,13 +20,12 @@ func init() {
 // generateFakeUsersCmd represents the generateFakeUsers command
 var generateFakeUsersCmd = &cobra.Command{
 	Use:   "generate-fake-users",
-	Short: "Generate a text file, insert data to Cognito and database",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Short: "Generate rows of fake users in a text file, also insert them to Cognito and into the database",
+	Long: `Generate rows of fake users in a text file, also insert them to Cognito and into the database.
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+Command example:
+
+fraudster_suspender generate-fake-users --num-users=1000 --dest-file=$HOME/Downloads/fraudsters.txt`,
 	Run: func(cmd *cobra.Command, args []string) {
 		start := time.Now()
 		setDatabaseConnection()
