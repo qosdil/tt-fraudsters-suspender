@@ -46,7 +46,7 @@ fraudster_suspender seq-suspend --source-file=/Users/john/Downloads/fraudsters.t
 		if err != nil {
 			log.Fatalf("failed to suspend in batch: %s", err.Error())
 		}
-		elapsed := time.Since(start)
+		elapsed := time.Since(start).Seconds()
 
 		// Output failures if there's any
 		for _, failure := range batchStatus.Failures {
@@ -54,6 +54,6 @@ fraudster_suspender seq-suspend --source-file=/Users/john/Downloads/fraudsters.t
 		}
 
 		log.Printf(suspender.DoneMsg, batchStatus.NumRows, batchStatus.NumSuccessful, batchStatus.NumFailed)
-		log.Printf("done in %s\n", elapsed)
+		log.Printf("done in %.2fs\n", elapsed)
 	},
 }

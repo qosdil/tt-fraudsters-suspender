@@ -43,10 +43,10 @@ fraudster_suspender generate-fake-users --num-users=1000 --dest-file=$HOME/Downl
 		if err != nil {
 			log.Fatal(err.Error())
 		}
-		elapsed := time.Since(start)
+		elapsed := time.Since(start).Seconds()
 
 		log.Printf("successfully generated %d fake users to Cognito, database and batch text file", numUsers)
-		log.Printf("done in %s\n", elapsed)
+		log.Printf("done in %.2fs\n", elapsed)
 	},
 }
 
