@@ -4,7 +4,7 @@
 
 This repo is the rewrite of the original version in which the code was a part of the whole closed-source User service repository.
 
-On the business aspect, this app is used to suspend hundreds of fraudster users in the platform to prevent them to sign in and get benefits from the available marketing programs (e.g. promo codes).
+On the business aspect, this app was used to suspend hundreds of fraudster users in the platform to prevent them to sign in and get benefits from the available marketing programs (e.g. promo codes).
 
 > *Note: the original version run as a job worker in a EKS cluster against Cognito and RDS/PostgreSQL in a shared private subnet.*
 
@@ -64,7 +64,7 @@ Example output:
 
 ### Suspend Fraudster Users, Fast
 
-This command will read the text file that we provide and then update each user's `Account status` to `Disabled` on Cognito and `is_enabled = FALSE` in the database.
+This command will read the text file that we provide and then update each user's `Account status` to `Disabled` on Cognito and set `is_enabled` to  `FALSE` in the database.
 
 The `suspend` command updates multiple rows with concurrency. For example:
 ```
